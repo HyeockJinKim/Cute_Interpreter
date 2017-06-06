@@ -284,20 +284,13 @@ class Node (object):
         if self.value in KeywordTable.table.keys():
             return KeywordTable.table[self.value]
 
-    def lookupLambda(self):  # 정리해서 다시 하자.. ㅠ...
-        if self.type is TokenType.LAMBDA:
-            if self.value < KeywordTable.lamdakey:
-                for key in KeywordTable.lamdatable[self.value].keys():
-                    continue
-                KeywordTable.temptable[key] = self.next
-                KeywordTable.lamdatable[self.value][key]
+    def lookupTemp(self):
+        if self.value in KeywordTable.temptable.keys():
+            return KeywordTable.temptable[self.value]
 
-
-class KeywordTable(object): ########################################################
+class KeywordTable(object):########
     table = {}
-    lamdatable = {}
     temptable = {}
-    lamdakey = 0
 
 class BasicPaser(object):
 
@@ -552,27 +545,24 @@ def run_func(op_code_node):
         return insert_table(l_node.value, new_r_node)
 
     def lamda(node):
-        l_node = node.value.next
+        l_node = node.value.next # table 에 넣어서 사용.
         r_node = l_node.next
-        print node.next.__str__()
 
-        return insert_lamdatable(l_node.value, r_node)
+        if node.next is None:
+            return node
+        variable = l_node.value
+        varvalue = node.next
+        while variable is not None:
+            KeywordTable.temptable[variable.value] = run_expr(varvalue)
+            variable = variable.next
+            varvalue = varvalue.next
+        result = run_expr(r_node)
 
-    def insert_lamdatable(id, value):
-        KeywordTable.lamdakey = KeywordTable.lamdakey + 1
-        lamdatable = {}
-        lamdatable[id] = value
-        KeywordTable.lamdatable[KeywordTable.lamdakey] = lamdatable
-        #for i in KeywordTable.lamdatable[KeywordTable.lamdakey].keys():
-        #    continue
-        return Node(TokenType.LAMBDA, KeywordTable.lamdakey)
-
+        return result
 
     def insert_table(id, value):
         KeywordTable.table[id] = value
         return KeywordTable.table[id]
-
-
 
     def run_cond(node):
         """
@@ -644,11 +634,17 @@ def run_expr(root_node):
     """
     if root_node is None:
         return None
-    root_node.lookupTable()
 
+    result = root_node.lookupTemp()
+    if result is not None:
+        return result
 
-    if root_node.value in KeywordTable.table.keys():
-        return KeywordTable.table[root_node.value]
+    result = root_node.lookupTable()
+    if result is not None:
+        return result
+
+    #if root_node.value in KeywordTable.table.keys(): lookuptable로 만듦.
+    #    return KeywordTable.table[root_node.value]
     if root_node.type is TokenType.ID:
         return root_node
     elif root_node.type is TokenType.INT:
@@ -658,6 +654,8 @@ def run_expr(root_node):
     elif root_node.type is TokenType.FALSE:
         return root_node
     elif root_node.type is TokenType.LIST:
+        if root_node.value.type is TokenType.LIST:
+            return run_expr(root_node.value)
         return run_list(root_node)
     else:
         print 'Run Expr Error'
@@ -764,6 +762,7 @@ def Test_All():
         console = raw_input()
         print "... ",
         Test_method(console)
+        KeywordTable.temptable.clear()
 
 Test_All()
 
