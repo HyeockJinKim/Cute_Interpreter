@@ -660,7 +660,6 @@ def run_expr(root_node):
             temp = KeywordTable.table[root_node.value.value]
             temp.next = root_node.value.next
             root_node.value = temp
-
             return run_expr(root_node)
         return run_list(root_node)
     else:
@@ -763,6 +762,30 @@ def Test_All():
     Test_method("(cond (#F 1) ( #T 2 ) )")
     Test_method("(cond ( ( null? ' ( 1 2 3 ) ) 1 ) ( ( > 100 10 ) 2 ) ( #T 3 ) )")
     """
+    Test_method("(define a 1)")
+    Test_method("(define b `(1 2 3))")
+    Test_method("(define c ( -5 2))")
+    Test_method("(define d `(+ 2 3)")
+    Test_method("(define test b)")
+    Test_method("(+ a 3)")
+    Test_method("(define a 2)")
+    Test_method("((lambda (x) (* x -2)) 3)")
+    Test_method("((lambda (x) (/ x 2)) a)")
+    Test_method("((lambda (x y) (* x y)) 3 5)")
+    Test_method("((lambda (x y) (* x y)) a 5)")
+    Test_method("(define plus1 (lambda (x) (+ x 1)))")
+    Test_method("(plus1 3)")
+    Test_method("(define mul1 (lambda (x) (* x a)))")
+    Test_method("(mul1 a)")
+    Test_method("(define plus2 (lambda (x) (+ (plus1 x) 1)))")
+    Test_method("(define plus3 (lambda (x) (+ (plus1 x) a)))")
+    Test_method("(mul2 7)")
+    Test_method("(define lastitem (lambda (ls) (cond ((null? (cdr ls)) (car ls)) (#T (lastitem (cdr ls))))))")
+    Test_method("(define square (lambda (x) (* x x))) (define yourfunc (lambda (x func) (func x)) (yourfunc 3 square)")
+    Test_method("(define square (lambda (x) (* x x))) (define mul_two (lambda (x) (* 2 x))) (define new_fun (lambda (fun1 fun2 x) (fun2 (fun1 x)))) (new_fun square mul_two 10)")
+    Test_method("(define cube (lambda (n) (define sqrt (lambda (n) (* n n))) (* (sqrt n) n)))")
+    Test_method("(sqrt 4)")
+
     while True:
         print ("> "),
         console = raw_input()
