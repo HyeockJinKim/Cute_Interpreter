@@ -656,6 +656,12 @@ def run_expr(root_node):
     elif root_node.type is TokenType.LIST:
         if root_node.value.type is TokenType.LIST:
             return run_expr(root_node.value)
+        if root_node.value.value in KeywordTable.table.keys():
+            temp = KeywordTable.table[root_node.value.value]
+            temp.next = root_node.value.next
+            root_node.value = temp
+
+            return run_expr(root_node)
         return run_list(root_node)
     else:
         print 'Run Expr Error'
