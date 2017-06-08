@@ -282,11 +282,11 @@ class Node (object):
 
     def lookupTable(self):
         if self.value in KeywordTable.table.keys():
-            return KeywordTable.table[self.value]
+            return KeywordTable.table.get(self.value)
 
     def lookupTemp(self):
         if self.value in KeywordTable.temptable.keys():
-            return KeywordTable.temptable[self.value]
+            return KeywordTable.temptable.get(self.value)
 
 class KeywordTable(object):########
     table = {}
@@ -551,18 +551,19 @@ def run_func(op_code_node):
         if node.next is None:
             return node
         variable = l_node.value
-        varvalue = node.next
+        var_value = node.next
         while variable is not None:
-            KeywordTable.temptable[variable.value] = run_expr(varvalue)
+            temp_value = run_expr(var_value)
+            KeywordTable.temptable[variable.value] = temp_value
             variable = variable.next
-            varvalue = varvalue.next
+            var_value = var_value.next
         result = run_expr(r_node)
 
         return result
 
     def insert_table(id, value):
         KeywordTable.table[id] = value
-        return KeywordTable.table[id]
+        return KeywordTable.table.get(id)
 
     def run_cond(node):
         """
@@ -583,7 +584,7 @@ def run_func(op_code_node):
         if cond_node.type is TokenType.FALSE:
             return run_cond(node.next)
         else:
-            return result
+            return run_expr(node.value.next)
 
     def create_new_quote_list(value_node, list_flag=False):
         """
@@ -657,11 +658,12 @@ def run_expr(root_node):
         if root_node.value.type is TokenType.LIST:
             return run_expr(root_node.value)
         if root_node.value.value in KeywordTable.table.keys():
-            temp = KeywordTable.table[root_node.value.value]
-            temp.next = root_node.value.next
+            temp = KeywordTable.table.get(root_node.value.value)
+            temp1 = root_node.value.next
             root_node.value = temp
+            root_node.value.next = temp1
 
-            return run_expr(root_node)
+            return run_expr(root_node.value)
         return run_list(root_node)
     else:
         print 'Run Expr Error'
@@ -763,11 +765,48 @@ def Test_All():
     Test_method("(cond (#F 1) ( #T 2 ) )")
     Test_method("(cond ( ( null? ' ( 1 2 3 ) ) 1 ) ( ( > 100 10 ) 2 ) ( #T 3 ) )")
     """
+
+
+
+    # Test_method("(define a 1)")
+    # Test_method("(define b '(1 2 3))")
+    # Test_method("(define c (- 5 2))")
+    # Test_method("(define d '(+ 2 3)")
+    # Test_method("(define test b)")
+    # Test_method("(+ a 3)")
+    # Test_method("(define a 2)")
+    # Test_method("(* a 4)")
+    # Test_method("((lambda (x) (* x -2)) 3)")
+    # Test_method("((lambda (x) (/ x 2)) a)")
+    # Test_method("((lambda (x y) (* x y)) 3 5)")
+    # Test_method("((lambda (x y) (* x y)) a 5)")
+    # Test_method("(define plus1 (lambda (x) (+ x 1)))")
+    # Test_method("(plus1 3)")
+    # Test_method("(define mul1 (lambda (x) (* x a)))")
+    # Test_method("(mul1 a)")
+    # Test_method("(define plus2 (lambda (x) (+ (plus1 x) 1)))")
+    # Test_method("(plus2 4)")
+    # Test_method("(define plus3 (lambda (x) (+ (plus1 x) a)))")
+    # Test_method("(plus3 a)")
+    # Test_method("(define mul2 (lambda (x) (* (plus1 x) -2)))")
+    # Test_method("(mul2 7)")
+
+    # Test_method("(define lastitem (lambda (ls) (cond ((null? (cdr ls)) (car ls)) (#T (lastitem (cdr ls))))))")
+    # Test_method("(lastitem '(1 2 3 4 5))")
+    # Test_method("(define square (lambda (x) (* x x)))")
+    # Test_method("(define yourfunc (lambda (x func) (func x))")
+    # Test_method("(yourfunc 3 square)")
+    # Test_method("(define square (lambda (x) (* x x))) (define mul_two (lambda (x) (* 2 x))) (define new_fun (lambda (fun1 fun2 x) (fun2 (fun1 x)))) (new_fun square mul_two 10)")
+    # Test_method("(define cube (lambda (n) (define sqrt (lambda (n) (* n n))) (* (sqrt n) n)))")
+    # Test_method("(sqrt 4)")
+
     while True:
         print ("> "),
         console = raw_input()
         print "... ",
         Test_method(console)
+        if KeywordTable.table.has_key('plus1'):
+            print KeywordTable.table['plus1']
         KeywordTable.temptable.clear()
 
 Test_All()
