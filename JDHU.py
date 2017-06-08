@@ -659,11 +659,11 @@ def run_expr(root_node):
             return run_expr(root_node.value)
         if root_node.value.value in KeywordTable.table.keys():
             temp = KeywordTable.table.get(root_node.value.value)
-            temp1 = root_node.value.next
-            root_node.value = temp
-            root_node.value.next = temp1
+            root_node.value.value = temp.value
+            root_node.value.type = temp.type
 
-            return run_expr(root_node.value)
+
+            return run_expr(root_node)
         return run_list(root_node)
     else:
         print 'Run Expr Error'
@@ -805,8 +805,6 @@ def Test_All():
         console = raw_input()
         print "... ",
         Test_method(console)
-        if KeywordTable.table.has_key('plus1'):
-            print KeywordTable.table['plus1']
         KeywordTable.temptable.clear()
 
 Test_All()
