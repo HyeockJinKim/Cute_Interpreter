@@ -542,6 +542,7 @@ def run_func(op_code_node):
         l_node = node.value.next
         r_node = l_node.next
         new_r_node = run_expr(r_node)
+
         return insert_table(l_node.value, new_r_node)
 
     def lamda(node):
@@ -550,8 +551,20 @@ def run_func(op_code_node):
 
         if node.next is None:
             return node
+
+        if r_node.value.type is TokenType.DEFINE:
+            lamda_l_node = r_node.value.next
+            lamda_r_node = lamda_l_node.next
+            new_r_node = run_expr(lamda_r_node)
+            KeywordTable.temptable[lamda_l_node.value] = new_r_node
+            node.value.next.next = node.value.next.next.next
+
+        l_node = node.value.next # table 에 넣어서 사용.
+        r_node = l_node.next
+
         variable = l_node.value
         var_value = node.next
+
         while variable is not None:
             temp_value = run_expr(var_value)
             KeywordTable.temptable[variable.value] = temp_value
@@ -563,6 +576,8 @@ def run_func(op_code_node):
         return result
 
     def insert_table(id, value):
+        if id in KeywordTable.temptable.keys():
+            return
         KeywordTable.table[id] = value
         return KeywordTable.table.get(id)
 
@@ -771,60 +786,60 @@ def Test_All():
     """
 
 
-    print "1번"
-    Test_method("(define a 1)")
-    print "2번"
-    Test_method("(define b '(1 2 3))")
-    print "3번"
-    Test_method("(define c (- 5 2))")
-    print "4번"
-    Test_method("(define d '(+ 2 3)")
-    print "5번"
-    Test_method("(define test b)")
-    Test_method("test")
-    print "6번"
-    Test_method("(+ a 3)")
-    print "7번"
-    Test_method("(define a 2)")
-    Test_method("(* a 4)")
-    print "8번"
-    Test_method("((lambda (x) (* x -2)) 3)")
-    print "9번"
-    Test_method("((lambda (x) (/ x 2)) a)")
-    print "10번"
-    Test_method("((lambda (x y) (* x y)) 3 5)")
-    print "11번"
-    Test_method("((lambda (x y) (* x y)) a 5)")
-    print "12번"
-    Test_method("(define plus1 (lambda (x) (+ x 1)))")
-    Test_method("(plus1 3)")
-    print "13번"
-    Test_method("(define mul1 (lambda (x) (* x a)))")
-    Test_method("(mul1 a)")
-    print "14번"
-    Test_method("(define plus2 (lambda (x) (+ (plus1 x) 1)))")
-    Test_method("(plus2 4)")
-    print "15번"
-    Test_method("(define plus3 (lambda (x) (+ (plus1 x) a)))")
-    Test_method("(plus3 a)")
-    print "16번"
-    Test_method("(define mul2 (lambda (x) (* (plus1 x) -2)))")
-    Test_method("(mul2 7)")
-    print "17번"
-    Test_method("(define lastitem (lambda (ls) (cond ((null? (cdr ls)) (car ls)) (#T (lastitem (cdr ls))))))")
-    Test_method("(lastitem '(1 2 3 4 5))")
-    print "18번"
-    Test_method("(define square (lambda (x) (* x x)))")
-    Test_method("(define yourfunc (lambda (x func) (func x))")
-    Test_method("(yourfunc 3 square)")
-    print "19번"
-    Test_method("(define square (lambda (x) (* x x)))")
-    Test_method("(define multwo (lambda (x) (* 2 x)))")  #
-    Test_method("(define newfun (lambda (fun1 fun2 x) (fun2 (fun1 x))))")
-    Test_method("(newfun square multwo 10)")
-    print "20번"
-    Test_method("(define cube (lambda (n) (define sqrt (lambda (n) (* n n))) (* (sqrt n) n)))")
-    Test_method("(cube 4")
+    # print "1번"
+    # Test_method("(define a 1)")
+    # print "2번"
+    # Test_method("(define b '(1 2 3))")
+    # print "3번"
+    # Test_method("(define c (- 5 2))")
+    # print "4번"
+    # Test_method("(define d '(+ 2 3)")
+    # print "5번"
+    # Test_method("(define test b)")
+    # Test_method("test")
+    # print "6번"
+    # Test_method("(+ a 3)")
+    # print "7번"
+    # Test_method("(define a 2)")
+    # Test_method("(* a 4)")
+    # print "8번"
+    # Test_method("((lambda (x) (* x -2)) 3)")
+    # print "9번"
+    # Test_method("((lambda (x) (/ x 2)) a)")
+    # print "10번"
+    # Test_method("((lambda (x y) (* x y)) 3 5)")
+    # print "11번"
+    # Test_method("((lambda (x y) (* x y)) a 5)")
+    # print "12번"
+    # Test_method("(define plus1 (lambda (x) (+ x 1)))")
+    # Test_method("(plus1 3)")
+    # print "13번"
+    # Test_method("(define mul1 (lambda (x) (* x a)))")
+    # Test_method("(mul1 a)")
+    # print "14번"
+    # Test_method("(define plus2 (lambda (x) (+ (plus1 x) 1)))")
+    # Test_method("(plus2 4)")
+    # print "15번"
+    # Test_method("(define plus3 (lambda (x) (+ (plus1 x) a)))")
+    # Test_method("(plus3 a)")
+    # print "16번"
+    # Test_method("(define mul2 (lambda (x) (* (plus1 x) -2)))")
+    # Test_method("(mul2 7)")
+    # print "17번"
+    # Test_method("(define lastitem (lambda (ls) (cond ((null? (cdr ls)) (car ls)) (#T (lastitem (cdr ls))))))")
+    # Test_method("(lastitem '(1 2 3 4 5))")
+    # print "18번"
+    # Test_method("(define square (lambda (x) (* x x)))")
+    # Test_method("(define yourfunc (lambda (x func) (func x))")
+    # Test_method("(yourfunc 3 square)")
+    # print "19번"
+    # Test_method("(define square (lambda (x) (* x x)))")
+    # Test_method("(define multwo (lambda (x) (* 2 x)))")  #
+    # Test_method("(define newfun (lambda (fun1 fun2 x) (fun2 (fun1 x))))")
+    # Test_method("(newfun square multwo 10)")
+    # print "20번"
+    # Test_method("(define cube (lambda (n) (define sqrt (lambda (n) (* n n))) (* (sqrt n) n)))")
+    # Test_method("(cube 4)")
     # Test_method("(sqrt 4)")
 
     while True:
